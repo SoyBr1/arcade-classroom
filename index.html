@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Arcade Classroom - Salón Multijugador</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <style>
+    body {
+      background-color: #12131A;
+      color: #F3F4F6;
+      font-family: 'Inter', sans-serif;
+    }
+    .font-arcade {
+      font-family: 'Press Start 2P', cursive;
+    }
+    .neon-border-cyan {
+      box-shadow: 0 0 12px rgba(6, 182, 212, 0.35);
+      border: 1px solid rgba(6, 182, 212, 0.6);
+    }
+    .neon-border-pink {
+      box-shadow: 0 0 12px rgba(236, 72, 153, 0.35);
+      border: 1px solid rgba(236, 72, 153, 0.6);
+    }
+    .neon-border-yellow {
+      box-shadow: 0 0 12px rgba(234, 179, 8, 0.35);
+      border: 1px solid rgba(234, 179, 8, 0.6);
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+  <!-- BARRA SUPERIOR -->
+  <header class="border-b border-gray-800 bg-[#181A24] px-6 py-4 flex justify-between items-center">
+    <div class="flex items-center gap-3">
+      <span class="text-2xl">🕹️</span>
+      <h1 class="font-arcade text-sm md:text-base text-cyan-400 tracking-wider">ARCADE CLASSROOM</h1>
+    </div>
+    <div id="user-header" class="hidden items-center gap-4">
+      <div class="bg-gray-900 px-4 py-1.5 rounded-full border border-yellow-500/40 flex items-center gap-2">
+        <span class="text-yellow-400">★</span>
+        <span id="header-points" class="font-arcade text-xs text-yellow-400">0</span>
+        <span class="text-xs text-gray-400">PTS</span>
+      </div>
+      <span id="header-username" class="font-semibold text-sm text-cyan-300"></span>
+      <button onclick="logout()" class="text-xs bg-red-500/20 hover:bg-red-500/40 text-red-300 border border-red-500/40 px-3 py-1.5 rounded-lg transition">
+        Salir
+      </button>
+    </div>
+  </header>
+
+  <!-- CONTENEDOR PRINCIPAL -->
+  <main class="flex-1 flex items-center justify-center p-6">
+
+    <!-- 1. PANTALLA DE LOGIN -->
+    <section id="login-screen" class="w-full max-w-md bg-[#181A24] p-8 rounded-2xl neon-border-cyan">
+      <h2 class="font-arcade text-center text-lg text-cyan-400 mb-2">INICIAR SESIÓN</h2>
+      <p class="text-center text-gray-400 text-sm mb-6">Introduce tu cuenta de jugador para entrar al salón</p>
+
+      <form onsubmit="handleLogin(event)" class="space-y-4">
+        <div>
+          <label class="block text-xs font-semibold uppercase text-gray-400 mb-1">Usuario</label>
+          <input type="text" id="username-input" required placeholder="Ej: pixel_king"
+            class="w-full bg-[#12131A] border border-gray-700 focus:border-cyan-400 rounded-xl px-4 py-3 text-sm outline-none transition">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold uppercase text-gray-400 mb-1">Contraseña</label>
+          <input type="password" id="password-input" required placeholder="••••••••"
+            class="w-full bg-[#12131A] border border-gray-700 focus:border-cyan-400 rounded-xl px-4 py-3 text-sm outline-none transition">
+        </div>
+        <p id="login-error" class="text-red-400 text-xs hidden">Usuario o contraseña incorrectos.</p>
+        <button type="submit"
+          class="w-full bg-cyan-500 hover:bg-cyan-400 text-gray-950 font-bold py-3 rounded-xl transition shadow-lg shadow-cyan-500/20">
+          ENTRAR AL SALÓN
+        </button>
+      </form>
+
+      <div class="mt-6 pt-4 border-t border-gray-800 text-xs text-gray-500 text-center">
+        🔒 Autenticación protegida con hash SHA-256 (sin contraseñas en texto plano).
+      </div>
+    </section>
+
+    <!-- 2. PANTALLA DEL LOBBY Y RANKING GLOBAL -->
+    <section id="lobby-screen" class="hidden w-full max-w-6xl grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+      <!-- Columna Izquierda: Juegos y Sistema de Rondas (2/3) -->
+      <div class="lg:col-span-2 space-y-6">
+        <div class="bg-[#181A24] p-6 rounded-2xl neon-border-cyan">
+          <div class="flex justify-between items-center mb-4">
+            <div>
+              <span class="text-xs uppercase font-bold text-pink-400 tracking-wider">Acceso Gratuito • Por Rondas</span>
+              <h2 class="font-arcade text-base md:text-lg text-white mt-1">SALA DE JUEGOS</h2>
+            </div>
+            <span class="bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 text-xs px-3 py-1 rounded-full">
+              Sala: #CLASE1
+            </span>
+          </div>
+
+          <p class="text-gray-400 text-sm mb-6">
+            Entrar a las partidas es gratis. Al terminar cada ronda, todos votáis un <strong>Mutador</strong> que cambiará las reglas de la siguiente ronda.
+          </p>
+
+          <!-- Tarjetas de Minijuegos -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="bg-[#12131A] p-5 rounded-xl border border-gray-800 hover:border-cyan-400 transition flex flex-col justify-between">
+              <div>
+                <div class="text-2xl mb-2">🎨</div>
+                <h3 class="font-bold text-white">Dibujo Caótico</h3>
+                <p class="text-xs text-gray-400 mt-1">Dibuja y adivina con mutadores como Pincel Borracho o A Ciegas.</p>
+              </div>
+              <button onclick="startRoundGame('Dibujo Caótico')" class="mt-4 w-full bg-cyan-500/20 hover:bg-cyan-500 hover:text-gray-950 text-cyan-300 border border-cyan-500/50 font-semibold py-2 rounded-lg text-xs transition">
+                Jugar Partida por Rondas
+              </button>
+            </div>
+
+            <div class="bg-[#12131A] p-5 rounded-xl border border-gray-800 hover:border-pink-400 transition flex flex-col justify-between">
+              <div>
+                <div class="text-2xl mb-2">💣</div>
+                <h3 class="font-bold text-white">Bomba de Palabras</h3>
+                <p class="text-xs text-gray-400 mt-1">Escribe rápido antes de que explote. Mutadores de letras prohibidas.</p>
+              </div>
+              <button onclick="startRoundGame('Bomba de Palabras')" class="mt-4 w-full bg-pink-500/20 hover:bg-pink-500 hover:text-gray-950 text-pink-300 border border-pink-500/50 font-semibold py-2 rounded-lg text-xs transition">
+                Jugar Partida por Rondas
+              </button>
+            </div>
+
+            <div class="bg-[#12131A] p-5 rounded-xl border border-gray-800 hover:border-yellow-400 transition flex flex-col justify-between">
+              <div>
+                <div class="text-2xl mb-2">⚡</div>
+                <h3 class="font-bold text-white">Guerra de Reflejos</h3>
+                <p class="text-xs text-gray-400 mt-1">Reacciona al instante. Mutadores de velocidad x2 y teclas invertidas.</p>
+              </div>
+              <button onclick="startRoundGame('Guerra de Reflejos')" class="mt-4 w-full bg-yellow-500/20 hover:bg-yellow-500 hover:text-gray-950 text-yellow-300 border border-yellow-500/50 font-semibold py-2 rounded-lg text-xs transition">
+                Jugar Partida por Rondas
+              </button>
+            </div>
+
+            <div class="bg-[#12131A] p-5 rounded-xl border border-gray-800 hover:border-purple-400 transition flex flex-col justify-between">
+              <div>
+                <div class="text-2xl mb-2">🕵️</div>
+                <h3 class="font-bold text-white">El Impostor</h3>
+                <p class="text-xs text-gray-400 mt-1">Deducción social en clase. Descubre quién no tiene la palabra secreta.</p>
+              </div>
+              <button onclick="startRoundGame('El Impostor')" class="mt-4 w-full bg-purple-500/20 hover:bg-purple-500 hover:text-gray-950 text-purple-300 border border-purple-500/50 font-semibold py-2 rounded-lg text-xs transition">
+                Jugar Partida por Rondas
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Columna Derecha: Ranking Global Acumulativo (1/3) -->
+      <div class="bg-[#181A24] p-6 rounded-2xl neon-border-yellow flex flex-col h-[540px]">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="font-arcade text-sm text-yellow-400">🏆 RANKING GLOBAL</h2>
+          <span class="text-xs text-gray-400">Histórico</span>
+        </div>
+        <p class="text-xs text-gray-400 mb-4">Los puntos se acumulan entre todas las partidas y nunca se reinician.</p>
+        
+        <div id="leaderboard-list" class="flex-1 overflow-y-auto space-y-2 pr-1">
+          <!-- Se rellena dinámicamente con los 15 jugadores -->
+        </div>
+      </div>
+
+    </section>
+
+    <!-- 3. PANTALLA DE RONDA EN CURSO Y VOTACIÓN DE MUTADORES -->
+    <section id="round-screen" class="hidden w-full max-w-2xl bg-[#181A24] p-8 rounded-2xl neon-border-pink text-center">
+      <div class="flex justify-between items-center mb-6">
+        <span id="round-game-title" class="font-arcade text-xs text-pink-400">MINIJUEGO</span>
+        <span id="round-number-badge" class="bg-pink-500/20 text-pink-300 border border-pink-500/40 text-xs px-3 py-1 rounded-full font-bold">
+          Ronda 1
+        </span>
+      </div>
+
+      <!-- Estado de la regla activa -->
+      <div class="bg-[#12131A] p-4 rounded-xl border border-gray-800 mb-6">
+        <span class="text-xs uppercase text-gray-400 font-bold">Condición activa en esta ronda:</span>
+        <p id="active-mutator-text" class="text-cyan-300 font-bold text-base mt-1">Reglas Estándar (Sin mutador)</p>
+      </div>
+
+      <!-- Zona de juego / Simulación de ronda -->
+      <div id="round-play-area" class="py-6">
+        <p class="text-gray-300 text-sm mb-6">
+          ¡Jugando la ronda! Pulsa el botón de abajo para simular que ganas esta ronda y ver cómo funciona la recompensa y la votación para la siguiente.
+        </p>
+        <button onclick="finishRoundAsWinner()"
+          class="bg-yellow-400 hover:bg-yellow-300 text-gray-950 font-bold px-6 py-3 rounded-xl transition shadow-lg shadow-yellow-400/20">
+          🏆 Ganar Ronda (+25 pts) y Pasar a Votación
+        </button>
+      </div>
+
+      <!-- Zona de Votación entre Rondas -->
+      <div id="round-vote-area" class="hidden py-4">
+        <h3 class="font-arcade text-sm text-cyan-400 mb-2">¡FIN DE LA RONDA!</h3>
+        <p class="text-xs text-gray-300 mb-6">Vota qué regla o condición quieres aplicar en la siguiente ronda:</p>
+
+        <div id="mutator-options" class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6">
+          <!-- Opciones de votación generadas por JS -->
+        </div>
+      </div>
+
+      <div class="mt-6 pt-4 border-t border-gray-800 flex justify-between items-center">
+        <button onclick="backToLobby()" class="text-xs text-gray-400 hover:text-white transition">
+          ← Volver al Salón y ver Ranking
+        </button>
+        <span class="text-xs text-gray-500">Los puntos ganados ya están en el Ranking Global</span>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    // BASE DE DATOS INICIAL: 15 Cuentas de prueba con sus hashes SHA-256 (sin texto plano)
+    const INITIAL_USERS = [
+      { username: "pixel_king",    passwordHash: "86dc33d2807a39b6bb286787e52fb0eb163f2a596c29d18961fe7765a3bb81a8", points: 150 },
+      { username: "neon_ninja",    passwordHash: "86a82d2d9717c5a18a224aa654be61da13eb142792c2ae92a14ff73b66ebfc98", points: 125 },
+      { username: "turbo_fox",     passwordHash: "194ce738bb8fb543f950625b14be3d673d33b8685c35e48d2841604a3fc4284e", points: 100 },
+      { username: "cyber_wolf",    passwordHash: "e657407755f63879ef7e7c10be3f529f607d85e164e154c96b21a539c932b504", points: 100 },
+      { username: "retro_queen",   passwordHash: "bf056ffea7ea4df9b1963fa81a4be0d3a1ecff3802f78483aa83952ff1e29eb0", points: 75 },
+      { username: "glitch_boy",    passwordHash: "fd9c349669f06cd0eb4c25e1e48d04471b23a35cb17b72bfbb05b5b0aa858ee0", points: 75 },
+      { username: "laser_cat",     passwordHash: "0572eb0d6c6eb0b01bbbe0bb901f2d9b77c2aa33c2020fc5d4dd82a79ff91be5", points: 50 },
+      { username: "arcade_boss",   passwordHash: "fb1f597d814bf0ebdc5ab6dd3496cb7be4ce9117d27ec9ee0f6053564c00cd19", points: 50 },
+      { username: "cosmic_ray",    passwordHash: "066ee0bc51ab3b237d8e1a862c7be6a080886fb7fd62ef5d71be52cf37518734", points: 25 },
+      { username: "shadow_bit",    passwordHash: "653d56be45e8e1b096ae7bc1eb37760ff04903f44df8f1b529bc9f24a2ef400f", points: 25 },
+      { username: "plasma_duck",   passwordHash: "a13684162cefe5e025a3c4855644cfbeff0fcbf624bb136a4be928ef289d0144", points: 0 },
+      { username: "nova_star",     passwordHash: "51cb18c3252857b45c7b4056065028496c1f70a4a12420ca33ce2a29d7924782", points: 0 },
+      { username: "vortex_kid",    passwordHash: "092647e3d4c77f0fb31b04a33a51bb16e1ed283a28ff865a18a3a8679695b31a", points: 0 },
+      { username: "hyper_frog",    passwordHash: "8ee6d53c2fb4f92be62fffa59a32f9b117713008a38bc43299aa7e67289a0c8d", points: 0 },
+      { username: "chrono_knight", passwordHash: "2601a49ff4973c02460c613dd38ab3b8c04d2fa6c17cfad1979a7eb4d1e2b87c", points: 0 }
+    ];
+
+    const MUTATORS_POOL = [
+      { name: "⚡ Velocidad Doble", desc: "El tiempo de la ronda se reduce a la mitad." },
+      { name: "🌀 Controles Invertidos", desc: "Las direcciones o trazos van al revés." },
+      { name: "🕶️ Modo A Ciegas", desc: "Oculta las pistas visuales durante 5 segundos." },
+      { name: "💎 Ronda Bonus (+50 pts)", desc: "El ganador de la siguiente ronda gana el doble de puntos." },
+      { name: "🚫 Letra Prohibida", desc: "No se puede usar la letra 'A' ni el color rojo." },
+      { name: "🌪️ Caos Total", desc: "Cambia el objetivo a mitad de la ronda." }
+    ];
+
+    let usersDB = [];
+    let currentUser = null;
+    let currentRound = 1;
+    let currentReward = 25;
+
+    // Cargar usuarios desde LocalStorage o inicializar los 15 por defecto
+    function initDatabase() {
+      const saved = localStorage.getItem("arcade_users_db_v1");
+      if (saved) {
+        usersDB = JSON.parse(saved);
+      } else {
+        usersDB = INITIAL_USERS;
+        saveDatabase();
+      }
+    }
+
+    function saveDatabase() {
+      localStorage.setItem("arcade_users_db_v1", JSON.stringify(usersDB));
+    }
+
+    // Función que convierte cualquier contraseña en un hash SHA-256
+    async function sha256(text) {
+      const msgBuffer = new TextEncoder().encode(text);
+      const hashBuffer = await crypto.subtle.digest("SHA-256", msgBuffer);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      return hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
+    }
+
+    // Inicio de sesión verificando el hash SHA-256
+    async function handleLogin(event) {
+      event.preventDefault();
+      const usernameInput = document.getElementById("username-input").value.trim().toLowerCase();
+      const passwordInput = document.getElementById("password-input").value;
+      const errorMsg = document.getElementById("login-error");
+
+      const inputHash = await sha256(passwordInput);
+      const foundUser = usersDB.find(u => u.username === usernameInput && u.passwordHash === inputHash);
+
+      if (foundUser) {
+        errorMsg.classList.add("hidden");
+        currentUser = foundUser;
+        showLobby();
+      } else {
+        errorMsg.classList.remove("hidden");
+      }
+    }
+
+    function showLobby() {
+      document.getElementById("login-screen").classList.add("hidden");
+      document.getElementById("round-screen").classList.add("hidden");
+      document.getElementById("lobby-screen").classList.remove("hidden");
+      document.getElementById("user-header").classList.remove("hidden");
+      document.getElementById("user-header").classList.add("flex");
+
+      updateHeaderAndLeaderboard();
+    }
+
+    function logout() {
+      currentUser = null;
+      document.getElementById("password-input").value = "";
+      document.getElementById("lobby-screen").classList.add("hidden");
+      document.getElementById("round-screen").classList.add("hidden");
+      document.getElementById("user-header").classList.add("hidden");
+      document.getElementById("login-screen").classList.remove("hidden");
+    }
+
+    function updateHeaderAndLeaderboard() {
+      if (currentUser) {
+        document.getElementById("header-username").textContent = currentUser.username;
+        document.getElementById("header-points").textContent = currentUser.points;
+      }
+
+      // Ordenar ranking global de mayor a menor puntuación
+      const sorted = [...usersDB].sort((a, b) => b.points - a.points);
+      const listEl = document.getElementById("leaderboard-list");
+      listEl.innerHTML = "";
+
+      sorted.forEach((user, index) => {
+        const isMe = currentUser && user.username === currentUser.username;
+        const medal = index === 0 ? "🥇" : index === 1 ? "🥈" : index === 2 ? "🥉" : `#${index + 1}`;
+        
+        const row = document.createElement("div");
+        row.className = `flex justify-between items-center px-3 py-2.5 rounded-xl text-xs border ${
+          isMe ? "bg-cyan-500/20 border-cyan-400 text-white font-bold" : "bg-[#12131A] border-gray-800 text-gray-300"
+        }`;
+        row.innerHTML = `
+          <div class="flex items-center gap-2.5">
+            <span class="w-6 text-center font-bold">${medal}</span>
+            <span>${user.username} ${isMe ? "(Tú)" : ""}</span>
+          </div>
+          <span class="font-arcade text-yellow-400">${user.points}</span>
+        `;
+        listEl.appendChild(row);
+      });
+    }
+
+    // Sistema de Rondas y Votación de Mutadores
+    function startRoundGame(gameName) {
+      currentRound = 1;
+      currentReward = 25;
+      document.getElementById("lobby-screen").classList.add("hidden");
+      document.getElementById("round-screen").classList.remove("hidden");
+      document.getElementById("round-game-title").textContent = gameName.toUpperCase();
+      document.getElementById("round-number-badge").textContent = `Ronda ${currentRound}`;
+      document.getElementById("active-mutator-text").textContent = "Reglas Estándar (Sin mutador)";
+      
+      document.getElementById("round-play-area").classList.remove("hidden");
+      document.getElementById("round-vote-area").classList.add("hidden");
+    }
+
+    function finishRoundAsWinner() {
+      // Sumar recompensa al ranking global del jugador
+      currentUser.points += currentReward;
+      saveDatabase();
+      updateHeaderAndLeaderboard();
+
+      // Mostrar pantalla de votación de mutadores para la siguiente ronda
+      document.getElementById("round-play-area").classList.add("hidden");
+      document.getElementById("round-vote-area").classList.remove("hidden");
+
+      const shuffled = [...MUTATORS_POOL].sort(() => 0.5 - Math.random()).slice(0, 3);
+      const container = document.getElementById("mutator-options");
+      container.innerHTML = "";
+
+      shuffled.forEach(mutator => {
+        const btn = document.createElement("button");
+        btn.className = "bg-[#12131A] hover:bg-cyan-500/20 border border-gray-700 hover:border-cyan-400 p-4 rounded-xl text-left transition flex flex-col justify-between";
+        btn.innerHTML = `
+          <div>
+            <div class="font-bold text-cyan-300 text-sm mb-1">${mutator.name}</div>
+            <div class="text-xs text-gray-400">${mutator.desc}</div>
+          </div>
+          <div class="mt-3 text-[11px] font-bold text-pink-400 uppercase">Votar esta regla →</div>
+        `;
+        btn.onclick = () => applyVotedMutator(mutator);
+        container.appendChild(btn);
+      });
+    }
+
+    function applyVotedMutator(mutator) {
+      currentRound++;
+      currentReward = mutator.name.includes("Bonus") ? 50 : 25;
+      document.getElementById("round-number-badge").textContent = `Ronda ${currentRound}`;
+      document.getElementById("active-mutator-text").textContent = `${mutator.name}: ${mutator.desc}`;
+      
+      document.getElementById("round-vote-area").classList.add("hidden");
+      document.getElementById("round-play-area").classList.remove("hidden");
+    }
+
+    function backToLobby() {
+      showLobby();
+    }
+
+    initDatabase();
+  </script>
+</body>
+</html>
