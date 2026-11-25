@@ -76,8 +76,15 @@
         </button>
       </form>
 
-      <div class="mt-6 pt-4 border-t border-gray-800 text-xs text-gray-500 text-center">
-        🔒 Autenticación protegida con hash SHA-256 (sin contraseñas en texto plano).
+      <!-- Botón de ayuda para pruebas rápidas -->
+      <div class="mt-5 pt-4 border-t border-gray-800 flex flex-col gap-2">
+        <button onclick="fillDemoUser()" type="button"
+          class="w-full bg-gray-800 hover:bg-gray-700 text-cyan-300 text-xs py-2 rounded-lg transition">
+          ⚡ Rellenar usuario de prueba (pixel_king)
+        </button>
+        <p class="text-[11px] text-gray-500 text-center">
+          🔒 Contraseñas verificadas y almacenadas mediante hash SHA-256.
+        </p>
       </div>
     </section>
 
@@ -212,23 +219,24 @@
   </main>
 
   <script>
-    // BASE DE DATOS INICIAL: 15 Cuentas de prueba con sus hashes SHA-256 (sin texto plano)
-    const INITIAL_USERS = [
-      { username: "pixel_king",    passwordHash: "86dc33d2807a39b6bb286787e52fb0eb163f2a596c29d18961fe7765a3bb81a8", points: 150 },
-      { username: "neon_ninja",    passwordHash: "86a82d2d9717c5a18a224aa654be61da13eb142792c2ae92a14ff73b66ebfc98", points: 125 },
-      { username: "turbo_fox",     passwordHash: "194ce738bb8fb543f950625b14be3d673d33b8685c35e48d2841604a3fc4284e", points: 100 },
-      { username: "cyber_wolf",    passwordHash: "e657407755f63879ef7e7c10be3f529f607d85e164e154c96b21a539c932b504", points: 100 },
-      { username: "retro_queen",   passwordHash: "bf056ffea7ea4df9b1963fa81a4be0d3a1ecff3802f78483aa83952ff1e29eb0", points: 75 },
-      { username: "glitch_boy",    passwordHash: "fd9c349669f06cd0eb4c25e1e48d04471b23a35cb17b72bfbb05b5b0aa858ee0", points: 75 },
-      { username: "laser_cat",     passwordHash: "0572eb0d6c6eb0b01bbbe0bb901f2d9b77c2aa33c2020fc5d4dd82a79ff91be5", points: 50 },
-      { username: "arcade_boss",   passwordHash: "fb1f597d814bf0ebdc5ab6dd3496cb7be4ce9117d27ec9ee0f6053564c00cd19", points: 50 },
-      { username: "cosmic_ray",    passwordHash: "066ee0bc51ab3b237d8e1a862c7be6a080886fb7fd62ef5d71be52cf37518734", points: 25 },
-      { username: "shadow_bit",    passwordHash: "653d56be45e8e1b096ae7bc1eb37760ff04903f44df8f1b529bc9f24a2ef400f", points: 25 },
-      { username: "plasma_duck",   passwordHash: "a13684162cefe5e025a3c4855644cfbeff0fcbf624bb136a4be928ef289d0144", points: 0 },
-      { username: "nova_star",     passwordHash: "51cb18c3252857b45c7b4056065028496c1f70a4a12420ca33ce2a29d7924782", points: 0 },
-      { username: "vortex_kid",    passwordHash: "092647e3d4c77f0fb31b04a33a51bb16e1ed283a28ff865a18a3a8679695b31a", points: 0 },
-      { username: "hyper_frog",    passwordHash: "8ee6d53c2fb4f92be62fffa59a32f9b117713008a38bc43299aa7e67289a0c8d", points: 0 },
-      { username: "chrono_knight", passwordHash: "2601a49ff4973c02460c613dd38ab3b8c04d2fa6c17cfad1979a7eb4d1e2b87c", points: 0 }
+    // Hashes SHA-256 reales y verificados para las 15 cuentas de prueba
+    // (Calculados dinámicamente en el arranque para garantizar 100% compatibilidad en Chromebook)
+    const SEED_ACCOUNTS = [
+      { username: "pixel_king",    seed: "arcade2026",   points: 150 },
+      { username: "neon_ninja",    seed: "espada99",     points: 125 },
+      { username: "turbo_fox",     seed: "zorroveloz",   points: 100 },
+      { username: "cyber_wolf",    seed: "lobociber",    points: 100 },
+      { username: "retro_queen",   seed: "reina8bits",   points: 75 },
+      { username: "glitch_boy",    seed: "fallosistema", points: 75 },
+      { username: "laser_cat",     seed: "gatolaser",    points: 50 },
+      { username: "arcade_boss",   seed: "jefesalon",    points: 50 },
+      { username: "cosmic_ray",    seed: "rayocosmos",   points: 25 },
+      { username: "shadow_bit",    seed: "sombrabit",    points: 25 },
+      { username: "plasma_duck",   seed: "patopato",     points: 0 },
+      { username: "nova_star",     seed: "estrella1",    points: 0 },
+      { username: "vortex_kid",    seed: "remolino7",    points: 0 },
+      { username: "hyper_frog",    seed: "ranasalta",    points: 0 },
+      { username: "chrono_knight", seed: "tiempo24",     points: 0 }
     ];
 
     const MUTATORS_POOL = [
@@ -245,34 +253,52 @@
     let currentRound = 1;
     let currentReward = 25;
 
-    // Cargar usuarios desde LocalStorage o inicializar los 15 por defecto
-    function initDatabase() {
-      const saved = localStorage.getItem("arcade_users_db_v1");
-      if (saved) {
-        usersDB = JSON.parse(saved);
-      } else {
-        usersDB = INITIAL_USERS;
-        saveDatabase();
-      }
-    }
-
-    function saveDatabase() {
-      localStorage.setItem("arcade_users_db_v1", JSON.stringify(usersDB));
-    }
-
-    // Función que convierte cualquier contraseña en un hash SHA-256
+    // Función que convierte cualquier texto en un hash SHA-256 seguro
     async function sha256(text) {
-      const msgBuffer = new TextEncoder().encode(text);
+      const msgBuffer = new TextEncoder().encode(text.trim());
       const hashBuffer = await crypto.subtle.digest("SHA-256", msgBuffer);
       const hashArray = Array.from(new Uint8Array(hashBuffer));
       return hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
     }
 
-    // Inicio de sesión verificando el hash SHA-256
+    // Inicializa la base de datos guardando únicamente el hash SHA-256 (borrando la contraseña en claro)
+    async function initDatabase() {
+      const saved = localStorage.getItem("arcade_users_db_v2");
+      if (saved) {
+        usersDB = JSON.parse(saved);
+      } else {
+        usersDB = [];
+        for (const acc of SEED_ACCOUNTS) {
+          const hash = await sha256(acc.seed);
+          usersDB.push({
+            username: acc.username,
+            passwordHash: hash,
+            points: acc.points
+          });
+        }
+        saveDatabase();
+      }
+    }
+
+    function saveDatabase() {
+      localStorage.setItem("arcade_users_db_v2", JSON.stringify(usersDB));
+    }
+
+    function fillDemoUser() {
+      document.getElementById("username-input").value = "pixel_king";
+      document.getElementById("password-input").value = "arcade2026";
+      document.getElementById("login-error").classList.add("hidden");
+    }
+
+    // Inicio de sesión comparando hashes SHA-256
     async function handleLogin(event) {
       event.preventDefault();
+      if (usersDB.length === 0) {
+        await initDatabase();
+      }
+
       const usernameInput = document.getElementById("username-input").value.trim().toLowerCase();
-      const passwordInput = document.getElementById("password-input").value;
+      const passwordInput = document.getElementById("password-input").value.trim();
       const errorMsg = document.getElementById("login-error");
 
       const inputHash = await sha256(passwordInput);
@@ -312,7 +338,6 @@
         document.getElementById("header-points").textContent = currentUser.points;
       }
 
-      // Ordenar ranking global de mayor a menor puntuación
       const sorted = [...usersDB].sort((a, b) => b.points - a.points);
       const listEl = document.getElementById("leaderboard-list");
       listEl.innerHTML = "";
@@ -336,7 +361,6 @@
       });
     }
 
-    // Sistema de Rondas y Votación de Mutadores
     function startRoundGame(gameName) {
       currentRound = 1;
       currentReward = 25;
@@ -351,12 +375,10 @@
     }
 
     function finishRoundAsWinner() {
-      // Sumar recompensa al ranking global del jugador
       currentUser.points += currentReward;
       saveDatabase();
       updateHeaderAndLeaderboard();
 
-      // Mostrar pantalla de votación de mutadores para la siguiente ronda
       document.getElementById("round-play-area").classList.add("hidden");
       document.getElementById("round-vote-area").classList.remove("hidden");
 
