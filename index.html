@@ -16,15 +16,15 @@
       font-family: 'Press Start 2P', cursive;
     }
     .neon-border-cyan {
-      box-shadow: 0 0 12px rgba(6, 182, 212, 0.35);
+      box-shadow: 0 0 14px rgba(6, 182, 212, 0.35);
       border: 1px solid rgba(6, 182, 212, 0.6);
     }
     .neon-border-pink {
-      box-shadow: 0 0 12px rgba(236, 72, 153, 0.35);
+      box-shadow: 0 0 14px rgba(236, 72, 153, 0.35);
       border: 1px solid rgba(236, 72, 153, 0.6);
     }
     .neon-border-yellow {
-      box-shadow: 0 0 12px rgba(234, 179, 8, 0.35);
+      box-shadow: 0 0 14px rgba(234, 179, 8, 0.35);
       border: 1px solid rgba(234, 179, 8, 0.6);
     }
   </style>
@@ -76,7 +76,6 @@
         </button>
       </form>
 
-      <!-- Botón de ayuda para pruebas rápidas -->
       <div class="mt-5 pt-4 border-t border-gray-800 flex flex-col gap-2">
         <button onclick="fillDemoUser()" type="button"
           class="w-full bg-gray-800 hover:bg-gray-700 text-cyan-300 text-xs py-2 rounded-lg transition">
@@ -88,82 +87,117 @@
       </div>
     </section>
 
-    <!-- 2. PANTALLA DEL LOBBY Y RANKING GLOBAL -->
+    <!-- 2. PANTALLA PRINCIPAL: ZONA DE CREAR SALA + RANKING GLOBAL -->
     <section id="lobby-screen" class="hidden w-full max-w-6xl grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-      <!-- Columna Izquierda: Juegos y Sistema de Rondas (2/3) -->
-      <div class="lg:col-span-2 space-y-6">
-        <div class="bg-[#181A24] p-6 rounded-2xl neon-border-cyan">
-          <div class="flex justify-between items-center mb-4">
-            <div>
-              <span class="text-xs uppercase font-bold text-pink-400 tracking-wider">Acceso Gratuito • Por Rondas</span>
-              <h2 class="font-arcade text-base md:text-lg text-white mt-1">SALA DE JUEGOS</h2>
+      <!-- Columna Izquierda (2/3): Zona de Crear / Unirse a Sala y Sala de Espera -->
+      <div class="lg:col-span-2">
+
+        <!-- SUB-VISTA A: CREAR O UNIRSE A UNA SALA -->
+        <div id="room-setup-panel" class="bg-[#181A24] p-6 md:p-8 rounded-2xl neon-border-cyan h-full flex flex-col justify-between">
+          <div>
+            <span class="text-xs uppercase font-bold text-pink-400 tracking-wider">Multijugador por Rondas</span>
+            <h2 class="font-arcade text-lg text-white mt-2 mb-3">CENTRAL DE SALAS</h2>
+            <p class="text-gray-400 text-sm mb-8">
+              Crea una sala nueva para que se unan tus amigos o introduce el código de 4 letras de la sala de tu grupo. Una vez dentro, en cada ronda saldrán <strong>3 minijuegos aleatorios</strong> para votar en 30 segundos y después votaréis el <strong>Mutador</strong>.
+            </p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <!-- Tarjeta Crear Sala -->
+              <div class="bg-[#12131A] p-6 rounded-xl border border-cyan-500/40 flex flex-col justify-between">
+                <div>
+                  <div class="text-3xl mb-3">🚀</div>
+                  <h3 class="font-bold text-white text-base mb-1">Crear Nueva Sala</h3>
+                  <p class="text-xs text-gray-400 mb-6">
+                    Genera un código único de 4 letras y sé el anfitrión de la partida.
+                  </p>
+                </div>
+                <button onclick="createNewRoom()"
+                  class="w-full bg-cyan-500 hover:bg-cyan-400 text-gray-950 font-bold py-3 rounded-xl text-sm transition shadow-lg shadow-cyan-500/20">
+                  + CREAR SALA
+                </button>
+              </div>
+
+              <!-- Tarjeta Unirse a Sala -->
+              <div class="bg-[#12131A] p-6 rounded-xl border border-pink-500/40 flex flex-col justify-between">
+                <div>
+                  <div class="text-3xl mb-3">🔑</div>
+                  <h3 class="font-bold text-white text-base mb-1">Unirse con Código</h3>
+                  <p class="text-xs text-gray-400 mb-4">
+                    Escribe el código de la sala que ha creado tu amigo:
+                  </p>
+                  <input type="text" id="join-code-input" maxlength="6" placeholder="EJ: A7X9"
+                    class="w-full bg-[#181A24] border border-gray-700 focus:border-pink-400 rounded-xl px-4 py-2.5 text-center font-arcade text-sm uppercase tracking-widest text-pink-300 outline-none mb-3">
+                  <p id="join-room-error" class="text-red-400 text-xs hidden mb-2 text-center">Introduce un código válido.</p>
+                </div>
+                <button onclick="joinExistingRoom()"
+                  class="w-full bg-pink-500 hover:bg-pink-400 text-gray-950 font-bold py-3 rounded-xl text-sm transition shadow-lg shadow-pink-500/20">
+                  UNIRSE A SALA →
+                </button>
+              </div>
             </div>
-            <span class="bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 text-xs px-3 py-1 rounded-full">
-              Sala: #CLASE1
-            </span>
           </div>
 
-          <p class="text-gray-400 text-sm mb-6">
-            Entrar a las partidas es gratis. Al terminar cada ronda, todos votáis un <strong>Mutador</strong> que cambiará las reglas de la siguiente ronda.
-          </p>
-
-          <!-- Tarjetas de Minijuegos -->
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div class="bg-[#12131A] p-5 rounded-xl border border-gray-800 hover:border-cyan-400 transition flex flex-col justify-between">
-              <div>
-                <div class="text-2xl mb-2">🎨</div>
-                <h3 class="font-bold text-white">Dibujo Caótico</h3>
-                <p class="text-xs text-gray-400 mt-1">Dibuja y adivina con mutadores como Pincel Borracho o A Ciegas.</p>
-              </div>
-              <button onclick="startRoundGame('Dibujo Caótico')" class="mt-4 w-full bg-cyan-500/20 hover:bg-cyan-500 hover:text-gray-950 text-cyan-300 border border-cyan-500/50 font-semibold py-2 rounded-lg text-xs transition">
-                Jugar Partida por Rondas
-              </button>
-            </div>
-
-            <div class="bg-[#12131A] p-5 rounded-xl border border-gray-800 hover:border-pink-400 transition flex flex-col justify-between">
-              <div>
-                <div class="text-2xl mb-2">💣</div>
-                <h3 class="font-bold text-white">Bomba de Palabras</h3>
-                <p class="text-xs text-gray-400 mt-1">Escribe rápido antes de que explote. Mutadores de letras prohibidas.</p>
-              </div>
-              <button onclick="startRoundGame('Bomba de Palabras')" class="mt-4 w-full bg-pink-500/20 hover:bg-pink-500 hover:text-gray-950 text-pink-300 border border-pink-500/50 font-semibold py-2 rounded-lg text-xs transition">
-                Jugar Partida por Rondas
-              </button>
-            </div>
-
-            <div class="bg-[#12131A] p-5 rounded-xl border border-gray-800 hover:border-yellow-400 transition flex flex-col justify-between">
-              <div>
-                <div class="text-2xl mb-2">⚡</div>
-                <h3 class="font-bold text-white">Guerra de Reflejos</h3>
-                <p class="text-xs text-gray-400 mt-1">Reacciona al instante. Mutadores de velocidad x2 y teclas invertidas.</p>
-              </div>
-              <button onclick="startRoundGame('Guerra de Reflejos')" class="mt-4 w-full bg-yellow-500/20 hover:bg-yellow-500 hover:text-gray-950 text-yellow-300 border border-yellow-500/50 font-semibold py-2 rounded-lg text-xs transition">
-                Jugar Partida por Rondas
-              </button>
-            </div>
-
-            <div class="bg-[#12131A] p-5 rounded-xl border border-gray-800 hover:border-purple-400 transition flex flex-col justify-between">
-              <div>
-                <div class="text-2xl mb-2">🕵️</div>
-                <h3 class="font-bold text-white">El Impostor</h3>
-                <p class="text-xs text-gray-400 mt-1">Deducción social en clase. Descubre quién no tiene la palabra secreta.</p>
-              </div>
-              <button onclick="startRoundGame('El Impostor')" class="mt-4 w-full bg-purple-500/20 hover:bg-purple-500 hover:text-gray-950 text-purple-300 border border-purple-500/50 font-semibold py-2 rounded-lg text-xs transition">
-                Jugar Partida por Rondas
-              </button>
-            </div>
+          <div class="mt-8 pt-4 border-t border-gray-800 flex flex-wrap justify-between items-center text-xs text-gray-400 gap-2">
+            <span>🎮 Pool actual: 6 minijuegos disponibles</span>
+            <span>⚡ Coste de entrada: Gratis (Recompensa +25 / +50 pts por ronda)</span>
           </div>
         </div>
+
+        <!-- SUB-VISTA B: SALA DE ESPERA CON AMIGOS CONECTADOS -->
+        <div id="room-waiting-panel" class="hidden bg-[#181A24] p-6 md:p-8 rounded-2xl neon-border-pink h-full flex flex-col justify-between">
+          <div>
+            <div class="flex flex-wrap justify-between items-center gap-4 mb-6 pb-4 border-b border-gray-800">
+              <div>
+                <span class="text-xs uppercase font-bold text-cyan-400">Sala de Espera Activa</span>
+                <div class="flex items-center gap-3 mt-1">
+                  <h2 class="font-arcade text-base md:text-lg text-white">CÓDIGO:</h2>
+                  <span id="display-room-code" class="font-arcade text-lg md:text-xl bg-pink-500/20 border border-pink-400 text-pink-300 px-4 py-1.5 rounded-xl">----</span>
+                </div>
+              </div>
+              <button onclick="leaveRoom()" class="text-xs bg-gray-800 hover:bg-gray-700 text-gray-300 px-3 py-2 rounded-lg transition">
+                ✕ Salir de la sala
+              </button>
+            </div>
+
+            <!-- Lista de jugadores en la sala -->
+            <div class="mb-6">
+              <div class="flex justify-between items-center mb-3">
+                <h3 class="text-xs font-bold uppercase text-gray-400">
+                  Jugadores en la sala (<span id="room-player-count">1</span>)
+                </h3>
+                <button onclick="simulateFriendJoining()"
+                  class="text-xs bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-500/40 px-3 py-1.5 rounded-lg transition">
+                  + Simular que se une un amigo de clase
+                </button>
+              </div>
+
+              <div id="room-players-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                <!-- Jugadores conectados en la sala -->
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-[#12131A] p-4 rounded-xl border border-gray-800">
+            <p class="text-xs text-gray-400 mb-3 text-center">
+              Cuando estéis todos listos, pulsa empezar para abrir la <strong>Votación de 30s</strong> con 3 minijuegos al azar.
+            </p>
+            <button onclick="startRoomRoundFlow()"
+              class="w-full bg-gradient-to-r from-cyan-500 to-pink-500 hover:opacity-95 text-gray-950 font-extrabold py-3.5 rounded-xl text-sm transition shadow-lg">
+              🎲 EMPEZAR RONDA 1 (VOTACIÓN DE 30s)
+            </button>
+          </div>
+        </div>
+
       </div>
 
-      <!-- Columna Derecha: Ranking Global Acumulativo (1/3) -->
+      <!-- Columna Derecha (1/3): Ranking Global Acumulativo -->
       <div class="bg-[#181A24] p-6 rounded-2xl neon-border-yellow flex flex-col h-[540px]">
-        <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center justify-between mb-2">
           <h2 class="font-arcade text-sm text-yellow-400">🏆 RANKING GLOBAL</h2>
           <span class="text-xs text-gray-400">Histórico</span>
         </div>
-        <p class="text-xs text-gray-400 mb-4">Los puntos se acumulan entre todas las partidas y nunca se reinician.</p>
+        <p class="text-xs text-gray-400 mb-4">Clasificación general acumulativa de todos los jugadores.</p>
         
         <div id="leaderboard-list" class="flex-1 overflow-y-auto space-y-2 pr-1">
           <!-- Se rellena dinámicamente con los 15 jugadores -->
@@ -172,55 +206,121 @@
 
     </section>
 
-    <!-- 3. PANTALLA DE RONDA EN CURSO Y VOTACIÓN DE MUTADORES -->
-    <section id="round-screen" class="hidden w-full max-w-2xl bg-[#181A24] p-8 rounded-2xl neon-border-pink text-center">
-      <div class="flex justify-between items-center mb-6">
-        <span id="round-game-title" class="font-arcade text-xs text-pink-400">MINIJUEGO</span>
-        <span id="round-number-badge" class="bg-pink-500/20 text-pink-300 border border-pink-500/40 text-xs px-3 py-1 rounded-full font-bold">
-          Ronda 1
-        </span>
-      </div>
+    <!-- 3. PANTALLA DEL FLUJO DE RONDA (PASO 1: VOTAR MINIJUEGO -> PASO 2: VOTAR MUTADOR -> PASO 3: JUGAR) -->
+    <section id="round-flow-screen" class="hidden w-full max-w-4xl bg-[#181A24] p-6 md:p-8 rounded-2xl neon-border-cyan">
 
-      <!-- Estado de la regla activa -->
-      <div class="bg-[#12131A] p-4 rounded-xl border border-gray-800 mb-6">
-        <span class="text-xs uppercase text-gray-400 font-bold">Condición activa en esta ronda:</span>
-        <p id="active-mutator-text" class="text-cyan-300 font-bold text-base mt-1">Reglas Estándar (Sin mutador)</p>
-      </div>
-
-      <!-- Zona de juego / Simulación de ronda -->
-      <div id="round-play-area" class="py-6">
-        <p class="text-gray-300 text-sm mb-6">
-          ¡Jugando la ronda! Pulsa el botón de abajo para simular que ganas esta ronda y ver cómo funciona la recompensa y la votación para la siguiente.
-        </p>
-        <button onclick="finishRoundAsWinner()"
-          class="bg-yellow-400 hover:bg-yellow-300 text-gray-950 font-bold px-6 py-3 rounded-xl transition shadow-lg shadow-yellow-400/20">
-          🏆 Ganar Ronda (+25 pts) y Pasar a Votación
+      <!-- Cabecera de la Sala y Ronda -->
+      <div class="flex flex-wrap justify-between items-center gap-3 pb-4 mb-6 border-b border-gray-800">
+        <div class="flex items-center gap-3">
+          <span id="flow-room-badge" class="bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 text-xs font-bold px-3 py-1 rounded-full">
+            SALA #----
+          </span>
+          <span id="flow-round-badge" class="bg-pink-500/20 text-pink-300 border border-pink-500/40 text-xs font-bold px-3 py-1 rounded-full">
+            RONDA 1
+          </span>
+        </div>
+        <button onclick="returnToWaitingRoom()" class="text-xs text-gray-400 hover:text-white transition">
+          ← Volver a la Sala de Espera
         </button>
       </div>
 
-      <!-- Zona de Votación entre Rondas -->
-      <div id="round-vote-area" class="hidden py-4">
-        <h3 class="font-arcade text-sm text-cyan-400 mb-2">¡FIN DE LA RONDA!</h3>
-        <p class="text-xs text-gray-300 mb-6">Vota qué regla o condición quieres aplicar en la siguiente ronda:</p>
+      <!-- FASE 1: VOTACIÓN DE 30 SEGUNDOS ENTRE 3 MINIJUEGOS ALEATORIOS -->
+      <div id="phase-vote-game" class="text-center">
+        <span class="text-xs uppercase font-bold text-cyan-400 tracking-wider">Fase 1 de la Ronda • Selección Aleatoria</span>
+        <h2 class="font-arcade text-base md:text-lg text-white mt-2 mb-2">VOTAD EL MINIJUEGO</h2>
+        <p class="text-xs text-gray-400 mb-6">
+          Han salido estos 3 minijuegos al azar. ¡El más votado cuando acabe la cuenta atrás será el que juguéis!
+        </p>
 
-        <div id="mutator-options" class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6">
-          <!-- Opciones de votación generadas por JS -->
+        <!-- Temporizador de 30 segundos -->
+        <div class="max-w-md mx-auto mb-6">
+          <div class="flex justify-between items-center text-xs mb-1.5">
+            <span class="text-gray-400">Tiempo restante para votar:</span>
+            <span id="game-vote-timer-text" class="font-arcade text-yellow-400 text-sm">30s</span>
+          </div>
+          <div class="w-full bg-gray-800 h-2.5 rounded-full overflow-hidden">
+            <div id="game-vote-progress" class="bg-gradient-to-r from-cyan-400 to-pink-500 h-full transition-all duration-1000" style="width: 100%"></div>
+          </div>
+        </div>
+
+        <!-- Las 3 cartas de minijuegos aleatorios -->
+        <div id="random-games-container" class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          <!-- Generadas dinámicamente -->
+        </div>
+
+        <button onclick="finishGameVotingNow()"
+          class="text-xs bg-gray-800 hover:bg-gray-700 text-cyan-300 border border-cyan-500/30 px-4 py-2 rounded-lg transition">
+          ⏩ Cerrar votación ya (Todos han votado)
+        </button>
+      </div>
+
+      <!-- FASE 2: VOTACIÓN DEL MUTADOR -->
+      <div id="phase-vote-mutator" class="hidden text-center">
+        <span class="text-xs uppercase font-bold text-pink-400 tracking-wider">Fase 2 de la Ronda • Alterar Reglas</span>
+        <h2 class="font-arcade text-base md:text-lg text-white mt-2 mb-2">¡JUEGO ELEGIDO: <span id="chosen-game-title" class="text-cyan-400"></span>!</h2>
+        <p class="text-xs text-gray-400 mb-6">
+          Ahora votad qué <strong>Mutador</strong> o condición loca se aplicará durante esta ronda:
+        </p>
+
+        <!-- Temporizador del mutador -->
+        <div class="max-w-md mx-auto mb-6">
+          <div class="flex justify-between items-center text-xs mb-1.5">
+            <span class="text-gray-400">Tiempo para votar mutador:</span>
+            <span id="mutator-vote-timer-text" class="font-arcade text-pink-400 text-sm">15s</span>
+          </div>
+          <div class="w-full bg-gray-800 h-2.5 rounded-full overflow-hidden">
+            <div id="mutator-vote-progress" class="bg-pink-500 h-full transition-all duration-1000" style="width: 100%"></div>
+          </div>
+        </div>
+
+        <div id="random-mutators-container" class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          <!-- 3 Mutadores al azar -->
+        </div>
+
+        <button onclick="finishMutatorVotingNow()"
+          class="text-xs bg-gray-800 hover:bg-gray-700 text-pink-300 border border-pink-500/30 px-4 py-2 rounded-lg transition">
+          ⏩ Confirmar mutador más votado ya
+        </button>
+      </div>
+
+      <!-- FASE 3: JUGAR EL MINIJUEGO CON EL MUTADOR ACTIVO -->
+      <div id="phase-play-game" class="hidden text-center">
+        <div class="bg-[#12131A] p-5 rounded-xl border border-gray-800 mb-6 flex flex-col md:flex-row justify-between items-center gap-4">
+          <div class="text-left">
+            <span class="text-xs uppercase text-gray-400 font-bold">Minijuego de esta ronda:</span>
+            <h3 id="active-game-header" class="font-arcade text-sm md:text-base text-cyan-400 mt-1">---</h3>
+          </div>
+          <div class="text-left md:text-right">
+            <span class="text-xs uppercase text-gray-400 font-bold">Mutador votado por la sala:</span>
+            <p id="active-mutator-header" class="text-pink-400 font-bold text-sm mt-1">---</p>
+          </div>
+        </div>
+
+        <!-- Escenario del minijuego -->
+        <div class="bg-[#12131A] border border-cyan-500/30 rounded-2xl p-8 mb-6">
+          <div id="active-game-icon" class="text-5xl mb-3">🎮</div>
+          <h4 class="font-bold text-white text-lg mb-2">¡Partida en curso con tus amigos!</h4>
+          <p id="active-game-instructions" class="text-xs text-gray-400 max-w-md mx-auto mb-6"></p>
+
+          <div class="flex flex-wrap justify-center gap-4">
+            <button onclick="completeRound(true)"
+              class="bg-yellow-400 hover:bg-yellow-300 text-gray-950 font-extrabold px-6 py-3 rounded-xl text-sm transition shadow-lg shadow-yellow-400/20">
+              🏆 Ganar esta Ronda y Pasar a la Siguiente →
+            </button>
+            <button onclick="completeRound(false)"
+              class="bg-gray-800 hover:bg-gray-700 text-gray-200 font-semibold px-5 py-3 rounded-xl text-xs transition">
+              🎲 Gana otro amigo de la sala → Siguiente Ronda
+            </button>
+          </div>
         </div>
       </div>
 
-      <div class="mt-6 pt-4 border-t border-gray-800 flex justify-between items-center">
-        <button onclick="backToLobby()" class="text-xs text-gray-400 hover:text-white transition">
-          ← Volver al Salón y ver Ranking
-        </button>
-        <span class="text-xs text-gray-500">Los puntos ganados ya están en el Ranking Global</span>
-      </div>
     </section>
 
   </main>
 
   <script>
-    // Hashes SHA-256 reales y verificados para las 15 cuentas de prueba
-    // (Calculados dinámicamente en el arranque para garantizar 100% compatibilidad en Chromebook)
+    // 1. CUENTAS DE PRUEBA (Verificadas con SHA-256)
     const SEED_ACCOUNTS = [
       { username: "pixel_king",    seed: "arcade2026",   points: 150 },
       { username: "neon_ninja",    seed: "espada99",     points: 125 },
@@ -239,21 +339,46 @@
       { username: "chrono_knight", seed: "tiempo24",     points: 0 }
     ];
 
+    // 2. CATÁLOGO DE MINIJUEGOS (Salen de 3 en 3 al azar en cada ronda)
+    const MINIGAMES_POOL = [
+      { id: "draw",     icon: "🎨", name: "Dibujo Caótico",     desc: "Dibuja conceptos absurdos con el trackpad y adivina lo que han hecho tus amigos." },
+      { id: "bomb",     icon: "💣", name: "Bomba de Palabras",  desc: "Escribe una palabra que contenga las sílabas pedidas antes de que explote la bomba." },
+      { id: "reflex",   icon: "⚡", name: "Guerra de Reflejos", desc: "Pulsa la tecla exacta en cuanto cambie el color de la pantalla. El más lento cae." },
+      { id: "impostor", icon: "🕵️", name: "El Impostor",        desc: "Todos reciben la palabra secreta menos uno. Dad una pista sin revelar demasiado." },
+      { id: "typing",   icon: "⌨️", name: "Carrera de Teclado", desc: "Teclea la frase arcade a toda velocidad sin cometer errores." },
+      { id: "memory",   icon: "🧠", name: "Secuencia Neón",     desc: "Memoriza y repite el patrón de luces y sonidos que va creciendo." }
+    ];
+
+    // 3. CATÁLOGO DE MUTADORES (Se votan después de elegir el minijuego)
     const MUTATORS_POOL = [
-      { name: "⚡ Velocidad Doble", desc: "El tiempo de la ronda se reduce a la mitad." },
-      { name: "🌀 Controles Invertidos", desc: "Las direcciones o trazos van al revés." },
-      { name: "🕶️ Modo A Ciegas", desc: "Oculta las pistas visuales durante 5 segundos." },
-      { name: "💎 Ronda Bonus (+50 pts)", desc: "El ganador de la siguiente ronda gana el doble de puntos." },
-      { name: "🚫 Letra Prohibida", desc: "No se puede usar la letra 'A' ni el color rojo." },
-      { name: "🌪️ Caos Total", desc: "Cambia el objetivo a mitad de la ronda." }
+      { name: "⚡ Velocidad Doble",      desc: "El tiempo límite se reduce a la mitad.", bonus: 25 },
+      { name: "🌀 Controles Invertidos", desc: "Las direcciones o trazos funcionan al revés.", bonus: 25 },
+      { name: "🕶️ Modo A Ciegas",       desc: "Las pistas se ocultan durante los primeros segundos.", bonus: 25 },
+      { name: "💎 Ronda Bonus (x2 Pts)", desc: "¡El ganador de esta ronda se lleva +50 puntos para el Ranking!", bonus: 50 },
+      { name: "🚫 Letra / Color Prohibido", desc: "Prohibido usar la letra 'A' o el color principal.", bonus: 25 },
+      { name: "🌪️ Caos Total",           desc: "Cambia la consigna a mitad de la ronda.", bonus: 50 }
     ];
 
     let usersDB = [];
     let currentUser = null;
-    let currentRound = 1;
-    let currentReward = 25;
 
-    // Función que convierte cualquier texto en un hash SHA-256 seguro
+    // Estado de la Sala y Ronda
+    let currentRoom = {
+      code: "",
+      players: [],
+      round: 1
+    };
+
+    let currentThreeGames = [];
+    let currentThreeMutators = [];
+    let myGameVoteIndex = null;
+    let myMutatorVoteIndex = null;
+    let selectedGame = null;
+    let selectedMutator = null;
+
+    let voteTimerInterval = null;
+    let timeRemaining = 30;
+
     async function sha256(text) {
       const msgBuffer = new TextEncoder().encode(text.trim());
       const hashBuffer = await crypto.subtle.digest("SHA-256", msgBuffer);
@@ -261,7 +386,6 @@
       return hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
     }
 
-    // Inicializa la base de datos guardando únicamente el hash SHA-256 (borrando la contraseña en claro)
     async function initDatabase() {
       const saved = localStorage.getItem("arcade_users_db_v2");
       if (saved) {
@@ -290,12 +414,9 @@
       document.getElementById("login-error").classList.add("hidden");
     }
 
-    // Inicio de sesión comparando hashes SHA-256
     async function handleLogin(event) {
       event.preventDefault();
-      if (usersDB.length === 0) {
-        await initDatabase();
-      }
+      if (usersDB.length === 0) await initDatabase();
 
       const usernameInput = document.getElementById("username-input").value.trim().toLowerCase();
       const passwordInput = document.getElementById("password-input").value.trim();
@@ -314,8 +435,9 @@
     }
 
     function showLobby() {
+      clearInterval(voteTimerInterval);
       document.getElementById("login-screen").classList.add("hidden");
-      document.getElementById("round-screen").classList.add("hidden");
+      document.getElementById("round-flow-screen").classList.add("hidden");
       document.getElementById("lobby-screen").classList.remove("hidden");
       document.getElementById("user-header").classList.remove("hidden");
       document.getElementById("user-header").classList.add("flex");
@@ -324,10 +446,11 @@
     }
 
     function logout() {
+      clearInterval(voteTimerInterval);
       currentUser = null;
       document.getElementById("password-input").value = "";
       document.getElementById("lobby-screen").classList.add("hidden");
-      document.getElementById("round-screen").classList.add("hidden");
+      document.getElementById("round-flow-screen").classList.add("hidden");
       document.getElementById("user-header").classList.add("hidden");
       document.getElementById("login-screen").classList.remove("hidden");
     }
@@ -361,58 +484,332 @@
       });
     }
 
-    function startRoundGame(gameName) {
-      currentRound = 1;
-      currentReward = 25;
-      document.getElementById("lobby-screen").classList.add("hidden");
-      document.getElementById("round-screen").classList.remove("hidden");
-      document.getElementById("round-game-title").textContent = gameName.toUpperCase();
-      document.getElementById("round-number-badge").textContent = `Ronda ${currentRound}`;
-      document.getElementById("active-mutator-text").textContent = "Reglas Estándar (Sin mutador)";
-      
-      document.getElementById("round-play-area").classList.remove("hidden");
-      document.getElementById("round-vote-area").classList.add("hidden");
+    // --- GESTIÓN DE SALAS ---
+    function generateRoomCode() {
+      const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+      let code = "";
+      for (let i = 0; i < 4; i++) {
+        code += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      return code;
     }
 
-    function finishRoundAsWinner() {
-      currentUser.points += currentReward;
-      saveDatabase();
-      updateHeaderAndLeaderboard();
+    function createNewRoom() {
+      const code = generateRoomCode();
+      currentRoom = {
+        code: code,
+        players: [currentUser.username],
+        round: 1
+      };
+      openWaitingRoomUI();
+    }
 
-      document.getElementById("round-play-area").classList.add("hidden");
-      document.getElementById("round-vote-area").classList.remove("hidden");
+    function joinExistingRoom() {
+      const input = document.getElementById("join-code-input").value.trim().toUpperCase();
+      const err = document.getElementById("join-room-error");
+      if (input.length < 3) {
+        err.classList.remove("hidden");
+        return;
+      }
+      err.classList.add("hidden");
+      currentRoom = {
+        code: input,
+        players: [currentUser.username, "neon_ninja", "turbo_fox"],
+        round: 1
+      };
+      openWaitingRoomUI();
+    }
 
-      const shuffled = [...MUTATORS_POOL].sort(() => 0.5 - Math.random()).slice(0, 3);
-      const container = document.getElementById("mutator-options");
-      container.innerHTML = "";
+    function openWaitingRoomUI() {
+      document.getElementById("room-setup-panel").classList.add("hidden");
+      document.getElementById("room-waiting-panel").classList.remove("hidden");
+      document.getElementById("display-room-code").textContent = currentRoom.code;
+      renderRoomPlayers();
+    }
 
-      shuffled.forEach(mutator => {
-        const btn = document.createElement("button");
-        btn.className = "bg-[#12131A] hover:bg-cyan-500/20 border border-gray-700 hover:border-cyan-400 p-4 rounded-xl text-left transition flex flex-col justify-between";
-        btn.innerHTML = `
-          <div>
-            <div class="font-bold text-cyan-300 text-sm mb-1">${mutator.name}</div>
-            <div class="text-xs text-gray-400">${mutator.desc}</div>
+    function leaveRoom() {
+      currentRoom = { code: "", players: [], round: 1 };
+      document.getElementById("room-waiting-panel").classList.add("hidden");
+      document.getElementById("room-setup-panel").classList.remove("hidden");
+    }
+
+    function simulateFriendJoining() {
+      const availableFriends = usersDB
+        .map(u => u.username)
+        .filter(name => !currentRoom.players.includes(name));
+
+      if (availableFriends.length === 0) return;
+      const randomFriend = availableFriends[Math.floor(Math.random() * availableFriends.length)];
+      currentRoom.players.push(randomFriend);
+      renderRoomPlayers();
+    }
+
+    function renderRoomPlayers() {
+      document.getElementById("room-player-count").textContent = currentRoom.players.length;
+      const grid = document.getElementById("room-players-grid");
+      grid.innerHTML = "";
+
+      currentRoom.players.forEach((pName, idx) => {
+        const isHost = idx === 0;
+        const card = document.createElement("div");
+        card.className = "bg-[#12131A] border border-gray-800 px-3 py-2.5 rounded-xl flex items-center justify-between text-xs";
+        card.innerHTML = `
+          <div class="flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-green-400"></span>
+            <span class="font-semibold text-white">${pName}</span>
           </div>
-          <div class="mt-3 text-[11px] font-bold text-pink-400 uppercase">Votar esta regla →</div>
+          ${isHost ? '<span class="text-[10px] bg-cyan-500/20 text-cyan-300 px-2 py-0.5 rounded">Líder</span>' : ''}
         `;
-        btn.onclick = () => applyVotedMutator(mutator);
-        container.appendChild(btn);
+        grid.appendChild(card);
       });
     }
 
-    function applyVotedMutator(mutator) {
-      currentRound++;
-      currentReward = mutator.name.includes("Bonus") ? 50 : 25;
-      document.getElementById("round-number-badge").textContent = `Ronda ${currentRound}`;
-      document.getElementById("active-mutator-text").textContent = `${mutator.name}: ${mutator.desc}`;
-      
-      document.getElementById("round-vote-area").classList.add("hidden");
-      document.getElementById("round-play-area").classList.remove("hidden");
+    // --- FLUJO DE RONDA: FASE 1 (VOTACIÓN DE 30s ENTRE 3 MINIJUEGOS ALEATORIOS) ---
+    function startRoomRoundFlow() {
+      document.getElementById("lobby-screen").classList.add("hidden");
+      document.getElementById("round-flow-screen").classList.remove("hidden");
+
+      document.getElementById("flow-room-badge").textContent = `SALA #${currentRoom.code}`;
+      document.getElementById("flow-round-badge").textContent = `RONDA ${currentRoom.round}`;
+
+      startMinigameVotePhase();
     }
 
-    function backToLobby() {
-      showLobby();
+    function startMinigameVotePhase() {
+      clearInterval(voteTimerInterval);
+      document.getElementById("phase-vote-game").classList.remove("hidden");
+      document.getElementById("phase-vote-mutator").classList.add("hidden");
+      document.getElementById("phase-play-game").classList.add("hidden");
+
+      // Elegir 3 minijuegos aleatorios del catálogo
+      currentThreeGames = [...MINIGAMES_POOL]
+        .sort(() => 0.5 - Math.random())
+        .slice(0, 3)
+        .map(g => ({ ...g, votes: 0 }));
+
+      myGameVoteIndex = null;
+      renderThreeGamesCards();
+
+      // Iniciar cuenta atrás de 30 segundos
+      timeRemaining = 30;
+      updateGameTimerUI();
+
+      voteTimerInterval = setInterval(() => {
+        timeRemaining--;
+        // Simular votos de amigos en la sala durante la cuenta atrás
+        if (timeRemaining === 25 || timeRemaining === 18) {
+          simulateFriendsVoting(currentThreeGames, renderThreeGamesCards);
+        }
+        updateGameTimerUI();
+        if (timeRemaining <= 0) {
+          finishGameVotingNow();
+        }
+      }, 1000);
+    }
+
+    function updateGameTimerUI() {
+      document.getElementById("game-vote-timer-text").textContent = `${timeRemaining}s`;
+      const percent = Math.max(0, (timeRemaining / 30) * 100);
+      document.getElementById("game-vote-progress").style.width = `${percent}%`;
+    }
+
+    function voteForMinigame(index) {
+      if (myGameVoteIndex !== null) {
+        currentThreeGames[myGameVoteIndex].votes--;
+      }
+      myGameVoteIndex = index;
+      currentThreeGames[index].votes++;
+      renderThreeGamesCards();
+    }
+
+    function renderThreeGamesCards() {
+      const container = document.getElementById("random-games-container");
+      container.innerHTML = "";
+
+      currentThreeGames.forEach((game, idx) => {
+        const isSelected = myGameVoteIndex === idx;
+        const card = document.createElement("button");
+        card.onclick = () => voteForMinigame(idx);
+        card.className = `p-5 rounded-2xl text-left transition flex flex-col justify-between border ${
+          isSelected
+            ? "bg-cyan-500/20 border-cyan-400 shadow-lg shadow-cyan-500/20"
+            : "bg-[#12131A] border-gray-800 hover:border-cyan-500/50"
+        }`;
+        card.innerHTML = `
+          <div>
+            <div class="flex justify-between items-start mb-3">
+              <span class="text-3xl">${game.icon}</span>
+              <span class="font-arcade text-xs px-2.5 py-1 rounded-full ${
+                game.votes > 0 ? "bg-cyan-400 text-gray-950" : "bg-gray-800 text-gray-400"
+              }">${game.votes} VOTOS</span>
+            </div>
+            <h3 class="font-bold text-white text-base mb-1">${game.name}</h3>
+            <p class="text-xs text-gray-400">${game.desc}</p>
+          </div>
+          <div class="mt-4 pt-3 border-t border-gray-800/80 text-xs font-bold ${
+            isSelected ? "text-cyan-300" : "text-gray-400"
+          }">
+            ${isSelected ? "✓ Has votado este juego" : "Haz clic para votar →"}
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function finishGameVotingNow() {
+      clearInterval(voteTimerInterval);
+      // Si nadie votó, simular votos de los amigos
+      const totalVotes = currentThreeGames.reduce((acc, g) => acc + g.votes, 0);
+      if (totalVotes === 0) {
+        currentThreeGames[Math.floor(Math.random() * 3)].votes = 1;
+      }
+      // Elegir el minijuego con más votos
+      const sorted = [...currentThreeGames].sort((a, b) => b.votes - a.votes);
+      selectedGame = sorted[0];
+
+      startMutatorVotePhase();
+    }
+
+    // --- FASE 2: VOTAR EL MUTADOR DE LA RONDA ---
+    function startMutatorVotePhase() {
+      document.getElementById("phase-vote-game").classList.add("hidden");
+      document.getElementById("phase-vote-mutator").classList.remove("hidden");
+      document.getElementById("chosen-game-title").textContent = `${selectedGame.icon} ${selectedGame.name.toUpperCase()}`;
+
+      currentThreeMutators = [...MUTATORS_POOL]
+        .sort(() => 0.5 - Math.random())
+        .slice(0, 3)
+        .map(m => ({ ...m, votes: 0 }));
+
+      myMutatorVoteIndex = null;
+      renderThreeMutatorsCards();
+
+      timeRemaining = 15;
+      updateMutatorTimerUI();
+
+      voteTimerInterval = setInterval(() => {
+        timeRemaining--;
+        if (timeRemaining === 11) {
+          simulateFriendsVoting(currentThreeMutators, renderThreeMutatorsCards);
+        }
+        updateMutatorTimerUI();
+        if (timeRemaining <= 0) {
+          finishMutatorVotingNow();
+        }
+      }, 1000);
+    }
+
+    function updateMutatorTimerUI() {
+      document.getElementById("mutator-vote-timer-text").textContent = `${timeRemaining}s`;
+      const percent = Math.max(0, (timeRemaining / 15) * 100);
+      document.getElementById("mutator-vote-progress").style.width = `${percent}%`;
+    }
+
+    function voteForMutator(index) {
+      if (myMutatorVoteIndex !== null) {
+        currentThreeMutators[myMutatorVoteIndex].votes--;
+      }
+      myMutatorVoteIndex = index;
+      currentThreeMutators[index].votes++;
+      renderThreeMutatorsCards();
+    }
+
+    function renderThreeMutatorsCards() {
+      const container = document.getElementById("random-mutators-container");
+      container.innerHTML = "";
+
+      currentThreeMutators.forEach((mut, idx) => {
+        const isSelected = myMutatorVoteIndex === idx;
+        const card = document.createElement("button");
+        card.onclick = () => voteForMutator(idx);
+        card.className = `p-5 rounded-2xl text-left transition flex flex-col justify-between border ${
+          isSelected
+            ? "bg-pink-500/20 border-pink-400 shadow-lg shadow-pink-500/20"
+            : "bg-[#12131A] border-gray-800 hover:border-pink-500/50"
+        }`;
+        card.innerHTML = `
+          <div>
+            <div class="flex justify-between items-center mb-2">
+              <span class="text-xs font-bold text-pink-400 uppercase">Mutador</span>
+              <span class="font-arcade text-xs px-2.5 py-1 rounded-full ${
+                mut.votes > 0 ? "bg-pink-400 text-gray-950" : "bg-gray-800 text-gray-400"
+              }">${mut.votes} VOTOS</span>
+            </div>
+            <h3 class="font-bold text-white text-base mb-1">${mut.name}</h3>
+            <p class="text-xs text-gray-400">${mut.desc}</p>
+          </div>
+          <div class="mt-4 pt-3 border-t border-gray-800/80 text-xs font-bold ${
+            isSelected ? "text-pink-300" : "text-gray-400"
+          }">
+            ${isSelected ? "✓ Mutador votado" : "Votar esta regla →"}
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function finishMutatorVotingNow() {
+      clearInterval(voteTimerInterval);
+      const totalVotes = currentThreeMutators.reduce((acc, m) => acc + m.votes, 0);
+      if (totalVotes === 0) {
+        currentThreeMutators[Math.floor(Math.random() * 3)].votes = 1;
+      }
+      const sorted = [...currentThreeMutators].sort((a, b) => b.votes - a.votes);
+      selectedMutator = sorted[0];
+
+      startPlayGamePhase();
+    }
+
+    function simulateFriendsVoting(itemsArray, renderCallback) {
+      if (currentRoom.players.length <= 1) return;
+      const randomIdx = Math.floor(Math.random() * itemsArray.length);
+      itemsArray[randomIdx].votes++;
+      renderCallback();
+    }
+
+    // --- FASE 3: JUGAR EL MINIJUEGO ELEGIDO CON EL MUTADOR Y PASAR A SIGUIENTE RONDA ---
+    function startPlayGamePhase() {
+      document.getElementById("phase-vote-mutator").classList.add("hidden");
+      document.getElementById("phase-play-game").classList.remove("hidden");
+
+      document.getElementById("active-game-header").textContent = `${selectedGame.icon} ${selectedGame.name}`;
+      document.getElementById("active-mutator-header").textContent = `${selectedMutator.name}`;
+      document.getElementById("active-game-icon").textContent = selectedGame.icon;
+      document.getElementById("active-game-instructions").textContent =
+        `${selectedGame.desc} | Condición especial: ${selectedMutator.desc} (Recompensa al ganador: +${selectedMutator.bonus} pts).`;
+    }
+
+    function completeRound(didCurrentUserWin) {
+      const reward = selectedMutator ? selectedMutator.bonus : 25;
+
+      if (didCurrentUserWin) {
+        currentUser.points += reward;
+      } else {
+        // Si gana otro amigo de la sala, le suma los puntos a ese amigo en el Ranking Global
+        const otherPlayers = currentRoom.players.filter(p => p !== currentUser.username);
+        if (otherPlayers.length > 0) {
+          const winnerName = otherPlayers[Math.floor(Math.random() * otherPlayers.length)];
+          const friendInDB = usersDB.find(u => u.username === winnerName);
+          if (friendInDB) friendInDB.points += reward;
+        } else {
+          currentUser.points += reward;
+        }
+      }
+
+      saveDatabase();
+      updateHeaderAndLeaderboard();
+
+      // Pasar automáticamente a la siguiente ronda con nueva votación de 30s de 3 minijuegos aleatorios
+      currentRoom.round++;
+      document.getElementById("flow-round-badge").textContent = `RONDA ${currentRoom.round}`;
+      startMinigameVotePhase();
+    }
+
+    function returnToWaitingRoom() {
+      clearInterval(voteTimerInterval);
+      document.getElementById("round-flow-screen").classList.add("hidden");
+      document.getElementById("lobby-screen").classList.remove("hidden");
+      updateHeaderAndLeaderboard();
     }
 
     initDatabase();
